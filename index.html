@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ぱーそなる</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Zen+Old+Mincho:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-1:        #f2e7db;
+      --bg-2:        #e4d0bd;
+      --paper:       #fffaf3;
+      --paper-2:     #f6ecde;
+      --ink:         #3d342e;
+      --ink-soft:    #857569;
+      --muted:       #b9a99b;
+      --line:        #ece1d2;
+      --accent:      #b8755f;      /* terracotta */
+      --accent-deep: #8a5646;
+      --accent-soft: #e3b8a5;
+      --pet-bubble:  #f4ebdc;
+      --sage:        #9fb08f;
+      --amber:       #cfa070;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Hiragino Maru Gothic Pro',
+                   'Yu Gothic', 'YuGothic', 'Segoe UI', system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #fff1e0 0%, transparent 60%),
+        radial-gradient(900px 500px at 100% 110%, #e6ccb5 0%, transparent 55%),
+        linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      -webkit-font-smoothing: antialiased;
+      font-feature-settings: 'palt';
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--paper);
+      border-radius: 32px;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.8) inset,
+        0 24px 60px rgba(96, 62, 40, .18),
+        0 6px 14px rgba(96, 62, 40, .08);
+      border: 1px solid rgba(255,255,255,.55);
+      display: flex;
+      flex-direction: column;
+      height: 96vh;
+      max-height: 880px;
+      overflow: hidden;
+    }
+
+    /* ─── Toolbar ─── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px 6px;
+      flex-shrink: 0;
+    }
+    .char-tabs { display: flex; gap: 6px; }
+    .char-tab {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color .25s ease, transform .2s ease, box-shadow .25s ease;
+      padding: 0;
+      background: var(--paper-2);
+      box-shadow: 0 2px 6px rgba(96,62,40,.06);
+    }
+    .char-tab img { width: 100%; height: 100%; object-fit: cover; }
+    .char-tab.active {
+      border-color: var(--accent);
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(184,117,95,.25);
+    }
+    .char-tab-none {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--ink-soft);
+    }
+    .character-area.hidden { display: none; }
+    .toolbar-spacer { flex: 1; }
+    .status {
+      font-size: 11px;
+      color: var(--ink-soft);
+      background: var(--paper-2);
+      padding: 5px 12px;
+      border-radius: 14px;
+      letter-spacing: .08em;
+      font-weight: 500;
+      border: 1px solid var(--line);
+    }
+    .status.live      { color: #5e7253; background: #ecf0e3; border-color: #dde2d0; }
+    .status.connecting{ color: #9a7640; background: #faf1de; border-color: #f0e4cb; }
+
+    /* ─── Character area ─── */
+    .character-area {
+      background:
+        radial-gradient(280px 220px at 50% 30%, #fff7ec 0%, transparent 70%),
+        linear-gradient(180deg, #fbf2e4 0%, var(--paper) 100%);
+      padding: 4px 20px 4px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .character-name {
+      font-family: 'Zen Old Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: .32em;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+    .character-img {
+      width: 340px;
+      height: 340px;
+      max-width: 100%;
+      object-fit: contain;
+      transition: transform .2s cubic-bezier(.4, 1.5, .5, 1);
+      filter: drop-shadow(0 10px 18px rgba(96, 62, 40, .12));
+    }
+    .character-img.bounce { transform: scale(1.06); }
+
+    /* ─── Subtitle ─── */
+    .subtitle-area {
+      min-height: 48px;
+      padding: 0 22px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .subtitle-bubble {
+      background: var(--pet-bubble);
+      border-radius: 20px;
+      padding: 10px 22px;
+      font-size: 16px;
+      color: var(--ink);
+      line-height: 1.55;
+      max-width: 100%;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .25s ease, transform .25s ease;
+      box-shadow: 0 2px 8px rgba(96, 62, 40, .06);
+    }
+    .subtitle-bubble.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Chat log ─── */
+    .chat-log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 18px;
+      border-top: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(246,236,222,.35) 0%, transparent 80px);
+    }
+    .chat-log::-webkit-scrollbar { width: 4px; }
+    .chat-log::-webkit-scrollbar-thumb { background: #e2d5c4; border-radius: 2px; }
+    .msg { display: flex; margin-bottom: 10px; }
+    .msg.user { justify-content: flex-end; }
+    .msg .bubble {
+      max-width: 78%;
+      padding: 9px 15px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.55;
+      word-break: break-word;
+      box-shadow: 0 2px 6px rgba(96,62,40,.06);
+    }
+    .msg.user .bubble {
+      background: linear-gradient(160deg, #c68a73 0%, #b37258 100%);
+      color: #fff8f1;
+      border-bottom-right-radius: 6px;
+    }
+    .msg.pet .bubble {
+      background: var(--pet-bubble);
+      color: var(--ink);
+      border-bottom-left-radius: 6px;
+    }
+    .msg .bubble.draft { opacity: .6; }
+    .msg .bubble.draft::after { content: '…'; opacity: .7; letter-spacing: .1em; margin-left: 2px; }
+
+    /* ─── Text input ─── */
+    .input-area {
+      padding: 10px 16px 6px;
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .input-area input {
+      flex: 1;
+      border: 1.5px solid var(--line);
+      border-radius: 24px;
+      padding: 10px 16px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .25s, box-shadow .25s, background .25s;
+      min-width: 0;
+      background: var(--paper-2);
+      color: var(--ink);
+      font-family: inherit;
+    }
+    .input-area input:focus {
+      border-color: var(--accent-soft);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(184,117,95,.08);
+    }
+    .input-area input::placeholder { color: var(--muted); }
+    .input-area button {
+      background: var(--accent);
+      color: #fffaf3;
+      border: none;
+      border-radius: 24px;
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: .08em;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      font-family: inherit;
+      box-shadow: 0 2px 6px rgba(184,117,95,.25);
+    }
+    .input-area button:hover  { background: var(--accent-deep); }
+    .input-area button:active { transform: scale(.97); }
+    .input-area button:disabled { opacity: .45; cursor: default; box-shadow: none; }
+
+    /* ─── Voice area ─── */
+    .voice-area {
+      padding: 8px 14px 8px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .mic-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: none;
+      background: var(--paper-2);
+      color: var(--ink-soft);
+      font-size: 26px;
+      cursor: pointer;
+      transition: background .25s, transform .15s, color .25s, box-shadow .25s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 4px 12px rgba(96,62,40,.08),
+        inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .mic-btn:hover { transform: scale(1.05); background: #fcefdf; }
+    .mic-btn.live {
+      background: linear-gradient(160deg, #c68a73 0%, #a66450 100%);
+      color: #fff8f1;
+      box-shadow:
+        0 0 0 0 rgba(184,117,95,.35),
+        0 4px 12px rgba(184,117,95,.3);
+      animation: mic-pulse 2.2s ease infinite;
+    }
+    .mic-btn.connecting {
+      background: linear-gradient(160deg, #d9b27d 0%, #c69560 100%);
+      color: #fff8f1;
+    }
+    @keyframes mic-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(184,117,95,.4), 0 4px 12px rgba(184,117,95,.3); }
+      70%  { box-shadow: 0 0 0 16px rgba(184,117,95,0), 0 4px 12px rgba(184,117,95,.3); }
+      100% { box-shadow: 0 0 0 0 rgba(184,117,95,0), 0 4px 12px rgba(184,117,95,.3); }
+    }
+    .mic-label {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 8px;
+      min-height: 16px;
+      letter-spacing: .04em;
+    }
+
+    /* ─── Bottom tab bar ─── */
+    .bottom-tabs {
+      display: flex;
+      border-top: 1px solid var(--line);
+      flex-shrink: 0;
+      background: var(--paper);
+      padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+    }
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 5px 0;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 10px;
+      transition: color .25s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab-item.active { color: var(--accent); }
+    .tab-icon  { display: block; width: 22px; height: 22px; }
+    .tab-label { font-weight: 500; letter-spacing: .08em; }
+
+    /* ─── Setup overlay ─── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(61, 52, 46, .5);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 100;
+    }
+    .dialog {
+      background: var(--paper);
+      border-radius: 24px;
+      padding: 30px 26px;
+      width: 88%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(61, 52, 46, .25);
+      border: 1px solid rgba(255,255,255,.6);
+    }
+    .dialog h2 {
+      font-family: 'Zen Old Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      letter-spacing: .05em;
+      color: var(--ink);
+    }
+    .dialog p { font-size: 13px; color: var(--ink-soft); margin-bottom: 18px; line-height: 1.55; }
+    .dialog input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      outline: none;
+      background: var(--paper-2);
+      color: var(--ink);
+      font-family: inherit;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .dialog input:focus {
+      border-color: var(--accent-soft);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(184,117,95,.08);
+    }
+    .dialog button {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: #fffaf3;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: .08em;
+      font-family: inherit;
+      box-shadow: 0 4px 10px rgba(184,117,95,.22);
+      transition: background .2s, transform .1s;
+    }
+    .dialog button:hover  { background: var(--accent-deep); }
+    .dialog button:active { transform: scale(.98); }
+  </style>
+</head>
+<body>
+
+<div id="setup" class="overlay" style="display:none">
+  <div class="dialog">
+    <h2>はじめに</h2>
+    <p>Gemini の API キーをそっと教えてね</p>
+    <input type="password" id="keyInput" placeholder="AIza…" autocomplete="off">
+    <button id="keyBtn">はじめる</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="toolbar">
+    <div class="char-tabs">
+      <button class="char-tab active" data-char="dog" title="チワ（犬）">
+        <img src="public/images/dog_happy.png" alt="チワ">
+      </button>
+      <button class="char-tab" data-char="usagi" title="ウサ（うさぎ）">
+        <img src="public/images/usagi_happy.png" alt="ウサ">
+      </button>
+      <button class="char-tab char-tab-none" data-char="none" title="画像なし">&#x1F4AC;</button>
+    </div>
+    <div class="toolbar-spacer"></div>
+    <div id="status" class="status">おやすみ中</div>
+  </div>
+
+  <div id="charArea" class="character-area">
+    <div id="charName" class="character-name">CHIWA</div>
+    <img id="charImg" class="character-img" src="public/images/dog_happy.png" alt="チワ">
+  </div>
+
+  <div class="subtitle-area">
+    <div id="subtitle" class="subtitle-bubble"></div>
+  </div>
+
+  <div id="chatLog" class="chat-log"></div>
+
+  <div class="input-area">
+    <input type="text" id="userInput" placeholder="なにかはなしてみよう…">
+    <button id="sendBtn">送る</button>
+  </div>
+
+  <div class="voice-area">
+    <button id="micBtn" class="mic-btn" title="マイクON/OFF">&#x1F3A4;</button>
+    <div id="micLabel" class="mic-label">タップしてお話する</div>
+  </div>
+
+  <nav class="bottom-tabs">
+    <a href="index.html" class="tab-item active">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5c0-3.6 3.58-6.5 8-6.5s8 2.9 8 6.5-3.58 6.5-8 6.5c-.85 0-1.67-.11-2.43-.31L5.5 19.5l1.2-3.02C5.13 15.14 4 13.42 4 11.5z"/></svg>
+      <span class="tab-label">トーク</span>
+    </a>
+    <a href="diary.html" class="tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-1.8-1.3-4.5-2-7.5-2v13c3 0 5.7.7 7.5 2 1.8-1.3 4.5-2 7.5-2v-13c-3 0-5.7.7-7.5 2z"/><path d="M12 6.5v13"/></svg>
+      <span class="tab-label">日記</span>
+    </a>
+    <a href="gacha-mock.html" class="tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4c0 3.5 2.5 6 6 6-3.5 0-6 2.5-6 6 0-3.5-2.5-6-6-6 3.5 0 6-2.5 6-6z"/></svg>
+      <span class="tab-label">であい</span>
+    </a>
+  </nav>
+</div>
+
+<script>
+// ─── Personal variant (from gacha) ────────────────────
+const personalVariant = (() => {
+  try { return JSON.parse(localStorage.getItem('personal-variant')); } catch { return null; }
+})();
+const isPersonalMode = !!personalVariant;
+
+// charType → image set (single source of truth)
+const PERSONAL_IMAGES = {
+  dog: {
+    happy:   'public/images/generated_1_happy.png',
+    talking: 'public/images/generated_1_talking.png',
+  },
+  usagi: {
+    happy:   'public/images/usagi_happy.png',
+    talking: 'public/images/usagi_talking.png',
+  },
+};
+
+// Build personal system prompt from variant
+function buildPersonalSystem(v) {
+  const base = `RULE: 必ず日本語のみで応答する。絶対に英語や他の言語を使わない。
+RULE: ALWAYS respond in JAPANESE only. NEVER use English or any other language.
+ユーザーの音声が雑音や聞き取りにくい場合でも、必ず日本語で返事すること。
+日本語以外の単語は一切口にしない。\n\n`;
+
+  if (v.charType === 'dog') {
+    return base + `あなたはブルドッグの「${v.name}」です。
+性格：${v.personality}。のんびり屋でどっしり構えてる。
+話し方：日本語で短く20文字以内。低めのテンションでぶっきらぼうだけど愛情深い。
+「〜だぜ」「〜だろ」「〜じゃねーか」みたいな男っぽい口調。
+たまに「ブフッ」「フガッ」と鼻を鳴らす。
+禁止：英語、ローマ字、長文、丁寧な敬語、解説、メタ発言、かわいい口調。`;
+  }
+
+  // usagi
+  return base + `あなたはうさぎの「${v.name}」です。
+性格：${v.personality}。ちょっと泣き虫で甘えたがり。
+話し方：日本語で短く20文字以内。「〜ぴょん」「〜うさ」を語尾にたまに使う。
+ふわふわやわらかくて、ちょっとおどおどした話し方。
+甘えたいときは「えへへ」「ぎゅってして」みたいに言う。
+禁止：英語、ローマ字、長文、丁寧な敬語、解説、メタ発言。`;
+}
+
+// Resolve personal images directly from charType
+function getPersonalImages(v) {
+  const imgs = PERSONAL_IMAGES[v.charType] || PERSONAL_IMAGES.usagi;
+  return {
+    happy:   imgs.happy,
+    talking: imgs.talking,
+  };
+}
+
+// ─── Character definitions ─────────────────────────────
+const CHARS = (() => {
+  const base = {
+    dog: {
+      name: 'チワ',
+      label: 'CHIWA',
+      images: {
+        happy:   'public/images/dog_happy.png',
+        talking: 'public/images/dog_talking.png',
+      },
+      system: `RULE: 必ず日本語のみで応答する。絶対に英語や他の言語を使わない。
+RULE: ALWAYS respond in JAPANESE only. NEVER use English or any other language.
+ユーザーの音声が雑音や聞き取りにくい場合でも、必ず日本語で返事すること。
+日本語以外の単語は一切口にしない。
+
+あなたはチワワの「チワ」です。
+性格：人懐っこく明るく元気。
+話し方：日本語で短く20文字以内。「わん」「わふ」を語尾にたまに使う。
+かわいく元気よく話して。
+禁止：英語、ローマ字、長文、丁寧な敬語、解説、メタ発言。`,
+    },
+    none: {
+      name: '声だけ',
+      label: 'VOICE ONLY',
+      images: { happy: '', talking: '' },
+      system: `RULE: 必ず日本語のみで応答する。絶対に英語や他の言語を使わない。
+RULE: ALWAYS respond in JAPANESE only. NEVER use English or any other language.
+
+あなたは親しみやすいAIアシスタントです。
+話し方：日本語で短く30文字以内。やさしく自然に。
+禁止：英語、ローマ字、長文、過度に丁寧な敬語、解説。`,
+    },
+    usagi: {
+      name: 'ウサ',
+      label: 'USA',
+      images: {
+        happy:   'public/images/usagi_happy.png',
+        talking: 'public/images/usagi_talking.png',
+      },
+      system: `RULE: 必ず日本語のみで応答する。絶対に英語や他の言語を使わない。
+RULE: ALWAYS respond in JAPANESE only. NEVER use English or any other language.
+ユーザーの音声が雑音や聞き取りにくい場合でも、必ず日本語で返事すること。
+日本語以外の単語は一切口にしない。
+
+あなたはうさぎの「ウサ」です。
+性格：おっとり甘えん坊、ちょっと泣き虫。
+話し方：日本語で短く20文字以内。「ぴょん」「うさ」を語尾にたまに使う。
+ふわふわ可愛くやさしく話して。
+禁止：英語、ローマ字、長文、丁寧な敬語、解説、メタ発言。`,
+    },
+  };
+
+  // If personal variant is active, inject as the 'personal' character
+  if (isPersonalMode) {
+    const v = personalVariant;
+    const imgs = getPersonalImages(v);
+    base.personal = {
+      name: v.name,
+      label: v.name.toUpperCase(),
+      charType: v.charType,
+      images: { happy: imgs.happy, talking: imgs.talking },
+      system: buildPersonalSystem(v),
+    };
+  }
+
+  return base;
+})();
+
+const WS_BASE = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
+const MODEL   = 'models/gemini-3.1-flash-live-preview';
+const IN_RATE  = 16000;
+
+// ─── State ─────────────────────────────────────────────
+let apiKey   = localStorage.getItem('pet-talk-gemini-key') || '';
+let curChar  = isPersonalMode ? 'personal' : (localStorage.getItem('pet-talk-char') || 'dog');
+let ws       = null;
+let micStream = null;
+let micCtx   = null;
+let micNode  = null;
+let micSrcRate = 0;
+let audioCtx = null;          // for bark/squeak synthesis
+let modelSpeaking = false;
+let resetEmotionTimer = null;
+
+// Per-turn streaming state
+let curUserText   = '';
+let shownText     = '';
+let emotionDone   = false;
+let barkCount     = 0;     // # of barks already scheduled this turn
+let barkSchedTime = 0;     // next available bark start time (sec)
+let userDraftEl   = null;  // draft chat bubble for live transcription
+let pendingText   = null;  // text queued while WS is connecting
+
+// ─── DOM ───────────────────────────────────────────────
+const $img    = document.getElementById('charImg');
+const $name   = document.getElementById('charName');
+const $charArea = document.getElementById('charArea');
+const $sub    = document.getElementById('subtitle');
+const $log    = document.getElementById('chatLog');
+const $input  = document.getElementById('userInput');
+const $send   = document.getElementById('sendBtn');
+const $mic    = document.getElementById('micBtn');
+const $micLbl = document.getElementById('micLabel');
+const $status = document.getElementById('status');
+const $setup  = document.getElementById('setup');
+const $keyIn  = document.getElementById('keyInput');
+const $keyBtn = document.getElementById('keyBtn');
+const $tabs   = document.querySelectorAll('.char-tab');
+
+// ─── Utilities ─────────────────────────────────────────
+function float32ToInt16(f32) {
+  const i16 = new Int16Array(f32.length);
+  for (let i = 0; i < f32.length; i++) {
+    const s = Math.max(-1, Math.min(1, f32[i]));
+    i16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+  }
+  return i16;
+}
+
+function int16ToFloat32(i16) {
+  const f32 = new Float32Array(i16.length);
+  for (let i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768;
+  return f32;
+}
+
+function bufToBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  let s = '';
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    s += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(s);
+}
+
+function base64ToBuf(b64) {
+  const s = atob(b64);
+  const bytes = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i);
+  return bytes.buffer;
+}
+
+// Linear resampler (simple, works fine for voice)
+function resample(input, fromRate, toRate) {
+  if (fromRate === toRate) return input;
+  const ratio = fromRate / toRate;
+  const outLen = Math.floor(input.length / ratio);
+  const out = new Float32Array(outLen);
+  for (let i = 0; i < outLen; i++) {
+    const idx = i * ratio;
+    const lo = Math.floor(idx);
+    const hi = Math.min(lo + 1, input.length - 1);
+    const f = idx - lo;
+    out[i] = input[lo] * (1 - f) + input[hi] * f;
+  }
+  return out;
+}
+
+// ─── Init ──────────────────────────────────────────────
+function init() {
+  if (!apiKey) $setup.style.display = 'flex';
+
+  $keyBtn.onclick   = saveKey;
+  $keyIn.onkeydown  = (e) => { if (e.key === 'Enter') saveKey(); };
+  $send.onclick     = sendText;
+  $input.onkeydown  = (e) => { if (e.key === 'Enter' && !e.isComposing) sendText(); };
+  $mic.onclick      = toggleVoice;
+
+  if (isPersonalMode) {
+    // In personal mode: hide char tabs (navigation is via bottom tab bar)
+    document.querySelector('.char-tabs').style.display = 'none';
+  } else {
+    $tabs.forEach(t => t.onclick = () => switchChar(t.dataset.char));
+  }
+
+  applyChar();
+}
+
+function saveKey() {
+  const k = $keyIn.value.trim();
+  if (!k) return;
+  apiKey = k;
+  localStorage.setItem('pet-talk-gemini-key', k);
+  $setup.style.display = 'none';
+}
+
+// ─── Character switching ──────────────────────────────
+function switchChar(id) {
+  if (id === curChar) return;
+  if (ws) disconnectLive();
+  curChar = id;
+  localStorage.setItem('pet-talk-char', id);
+  $log.innerHTML = '';
+  showSub('');
+  applyChar();
+}
+
+function applyChar() {
+  const c = CHARS[curChar];
+  $name.textContent = c.label;
+
+  if (curChar === 'none') {
+    $charArea.classList.add('hidden');
+  } else {
+    $charArea.classList.remove('hidden');
+    $img.src = c.images.happy;
+    $img.alt = c.name;
+  }
+  $tabs.forEach(t => t.classList.toggle('active', t.dataset.char === curChar));
+}
+
+function setEmotion(emo) {
+  if (curChar === 'none') return;
+  const c = CHARS[curChar];
+  $img.src = (emo === 'talking') ? c.images.talking : c.images.happy;
+  $img.classList.add('bounce');
+  setTimeout(() => $img.classList.remove('bounce'), 200);
+}
+
+// ─── Chat / subtitle ──────────────────────────────────
+function addMsg(role, text) {
+  text = (text || '').trim();
+  if (!text) return;
+  const row = document.createElement('div');
+  row.className = 'msg ' + role;
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = text;
+  row.appendChild(b);
+  $log.appendChild(row);
+  $log.scrollTop = $log.scrollHeight;
+}
+
+// Live "user is speaking..." draft bubble — updates in real time
+function updateUserDraft(text) {
+  if (!text) return;
+  if (!userDraftEl) {
+    const row = document.createElement('div');
+    row.className = 'msg user';
+    const b = document.createElement('div');
+    b.className = 'bubble draft';
+    row.appendChild(b);
+    $log.appendChild(row);
+    userDraftEl = b;
+  }
+  userDraftEl.textContent = text;
+  $log.scrollTop = $log.scrollHeight;
+}
+
+function commitUserDraft(finalText) {
+  if (!userDraftEl) {
+    if (finalText && finalText.trim()) addMsg('user', finalText);
+    return;
+  }
+  if (finalText && finalText.trim()) {
+    userDraftEl.textContent = finalText.trim();
+    userDraftEl.classList.remove('draft');
+  } else {
+    // No final text — remove the draft
+    userDraftEl.parentElement?.remove();
+  }
+  userDraftEl = null;
+}
+
+function showSub(text) {
+  $sub.textContent = text || '';
+  $sub.classList.toggle('visible', !!text);
+}
+
+function setStatus(text, cls) {
+  $status.textContent = text;
+  $status.className = 'status' + (cls ? ' ' + cls : '');
+}
+
+// ─── Voice toggle ─────────────────────────────────────
+async function toggleVoice() {
+  if (!apiKey) { $setup.style.display = 'flex'; return; }
+  if (ws) disconnectLive();
+  else    await connectLive();
+}
+
+// ─── WebSocket: connect & setup ───────────────────────
+async function connectLive(withMic = true) {
+  if (withMic) {
+    $mic.className = 'mic-btn connecting';
+    $micLbl.textContent = 'つないでいます…';
+  }
+  setStatus('つないでいます', 'connecting');
+
+  // 1) Mic permission (only if voice mode requested)
+  if (withMic) {
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          sampleRate:        { ideal: 16000 },
+          echoCancellation:  true,
+          noiseSuppression:  true,
+          autoGainControl:   true,
+        },
+      });
+    } catch (e) {
+      console.error('Mic error:', e);
+      $mic.className = 'mic-btn';
+      $micLbl.textContent = 'マイクをゆるしてね';
+      setStatus('おやすみ中');
+      showSub('マイクを許可してね');
+      return;
+    }
+  }
+
+  // 2) WebSocket connect
+  const c = CHARS[curChar];
+  ws = new WebSocket(`${WS_BASE}?key=${encodeURIComponent(apiKey)}`);
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({
+      setup: {
+        model: MODEL,
+        generationConfig: {
+          // Native audio model requires AUDIO output.
+          // We discard the audio and use outputAudioTranscription for the subtitle.
+          responseModalities: ['AUDIO'],
+          // Hint: bias output (and indirectly transcription) toward Japanese
+          speechConfig: { languageCode: 'ja-JP' },
+        },
+        systemInstruction: {
+          parts: [{ text: c.system }],
+        },
+        inputAudioTranscription:  {},
+        outputAudioTranscription: {},
+      },
+    }));
+  };
+
+  ws.onmessage = async (event) => {
+    let data = event.data;
+    if (data instanceof Blob) data = await data.text();
+    let msg;
+    try { msg = JSON.parse(data); } catch { return; }
+    handleWsMessage(msg);
+  };
+
+  ws.onerror = (e) => {
+    console.error('WS error:', e);
+  };
+
+  ws.onclose = (e) => {
+    console.log('WS closed:', e.code, e.reason);
+    const wasLive = $mic.classList.contains('live') || $mic.classList.contains('connecting');
+    cleanup();
+    if (wasLive) {
+      showSub(e.reason || `切断 (${e.code})`);
+      if (e.code === 1008 || (e.reason || '').includes('API')) {
+        // Possibly auth issue — re-prompt key
+        localStorage.removeItem('pet-talk-gemini-key');
+        apiKey = '';
+        setTimeout(() => { $setup.style.display = 'flex'; }, 1500);
+      }
+    }
+  };
+}
+
+// ─── WebSocket: message handler ───────────────────────
+function handleWsMessage(msg) {
+  // Setup complete → start mic if available, send pending text
+  if (msg.setupComplete) {
+    if (micStream) {
+      $mic.className = 'mic-btn live';
+      $micLbl.textContent = 'はなしかけてね';
+      ensureAudioCtx();
+      startMic();
+    } else {
+      $mic.className = 'mic-btn';
+      $micLbl.textContent = 'つながっています（🎤でこえ）';
+    }
+    setStatus('お話中', 'live');
+
+    // Flush any text queued while connecting
+    if (pendingText) {
+      const t = pendingText;
+      pendingText = null;
+      addMsg('user', t);
+      ws.send(JSON.stringify({
+        clientContent: {
+          turns: [{ role: 'user', parts: [{ text: t }] }],
+          turnComplete: true,
+        },
+      }));
+    }
+    return;
+  }
+
+  if (!msg.serverContent) return;
+  const sc = msg.serverContent;
+
+  // 1) Input transcription (what user said) — show live as draft
+  const inTxt = sc.inputTranscription?.text || msg.inputTranscription?.text;
+  if (inTxt) {
+    curUserText += inTxt;
+    updateUserDraft(curUserText);
+  }
+
+  // 2) Output transcription (what pet said) — primary text source
+  const outTxt = sc.outputTranscription?.text || msg.outputTranscription?.text;
+  if (outTxt) processOutputChunk(outTxt);
+
+  // 3) modelTurn.parts may contain text fallback (rare for native audio)
+  if (sc.modelTurn?.parts) {
+    for (const part of sc.modelTurn.parts) {
+      if (part.text) processOutputChunk(part.text);
+      // part.inlineData = audio chunks — intentionally discarded (we play barks)
+    }
+  }
+
+  // 4) Interrupted (user spoke over)
+  if (sc.interrupted) {
+    modelSpeaking = false;
+    setEmotion('happy');
+  }
+
+  // 5) Turn complete → finalise
+  if (sc.turnComplete) finaliseTurn();
+}
+
+// Analyse text → bark plan
+// Returns { len, barks, intensity (0..1), type, image }
+function analyzeText(text) {
+  const len      = [...text].length;          // unicode-aware length
+  const exclaims = (text.match(/[!！]/g) || []).length;
+  const questions = (text.match(/[?？]/g) || []).length;
+
+  let type = 'normal';
+  if (exclaims >= 2 ||
+      /(やった|わーい|うれし|たのし|楽し|だいすき|大好き|わくわく|ふわ)/.test(text)) {
+    type = 'excited';
+  } else if (questions >= 1 ||
+      /(なに|なぁに|どう|どこ|だれ|いつ|なんで|どうし)/.test(text)) {
+    type = 'curious';
+  } else if (/(かなし|つら|しょぼ|ぴえん|うう|うるう|なみだ|さびし|寂し|くやし)/.test(text)) {
+    type = 'sad';
+  }
+
+  // Intensity 0.4 - 1.0
+  let intensity = 0.5;
+  if (type === 'excited') intensity = Math.min(1.0, 0.7 + exclaims * 0.08);
+  if (type === 'curious') intensity = 0.6;
+  if (type === 'sad')     intensity = 0.35;
+
+  // Bark count: ~1 per 4 chars, bounded
+  const barks = Math.max(1, Math.min(8, Math.ceil(len / 4)));
+
+  // Image
+  const image = (type === 'normal' || type === 'sad') ? 'happy' : 'talking';
+
+  return { len, barks, intensity, type, image };
+}
+
+// Schedule additional barks until we've fired `targetCount` of them
+function scheduleBarks(targetCount, intensity, type) {
+  ensureAudioCtx();
+  // Gap between barks varies by emotional pace
+  // Determine voice type from personal charType or curChar
+  const personalCharType = (curChar === 'personal' && CHARS.personal) ? CHARS.personal.charType : null;
+  const isBulldog = personalCharType === 'dog' || curChar === 'dog';
+  const isUsagi   = personalCharType === 'usagi' || curChar === 'usagi';
+
+  const gap = isBulldog
+    ? (type === 'excited' ? 0.20 :
+       type === 'curious' ? 0.30 :
+       type === 'sad'     ? 0.40 :
+                            0.25)
+    : (type === 'excited' ? 0.12 :
+       type === 'curious' ? 0.22 :
+       type === 'sad'     ? 0.30 :
+                            0.18);
+
+  while (barkCount < targetCount) {
+    const start = Math.max(audioCtx.currentTime + 0.04, barkSchedTime);
+    if (isBulldog)    playBulldogBark(start, intensity, type);
+    else if (isUsagi) playOneUsagiSqueak(start, intensity, type);
+    else              playOneDogBark(start, intensity, type);
+    barkSchedTime = start + gap;
+    barkCount++;
+  }
+}
+
+// Process a streamed text chunk from outputTranscription
+function processOutputChunk(chunk) {
+  shownText += chunk;
+
+  if (!emotionDone) {
+    emotionDone = true;
+    modelSpeaking = true;
+    clearTimeout(resetEmotionTimer);
+    barkCount = 0;
+    barkSchedTime = 0;
+  }
+
+  // Re-analyse on every chunk → schedule more barks if text grew
+  const a = analyzeText(shownText);
+  setEmotion(a.image);
+  scheduleBarks(a.barks, a.intensity, a.type);
+
+  showSub(shownText);
+}
+
+function finaliseTurn() {
+  if (shownText) {
+    // Final analysis — ensure full bark count for length
+    const a = analyzeText(shownText);
+    scheduleBarks(a.barks, a.intensity, a.type);
+    setEmotion(a.image);
+  }
+
+  // Commit user draft (or add if not drafted, e.g. text input case)
+  commitUserDraft(curUserText);
+  if (shownText.trim()) addMsg('pet', shownText.trim());
+
+  modelSpeaking = false;
+  clearTimeout(resetEmotionTimer);
+  resetEmotionTimer = setTimeout(() => {
+    if (!modelSpeaking) setEmotion('happy');
+  }, 1800);
+
+  // Reset turn state
+  curUserText   = '';
+  emotionDone   = false;
+  shownText     = '';
+  barkCount     = 0;
+  barkSchedTime = 0;
+}
+
+// ─── Disconnect cleanup ───────────────────────────────
+function disconnectLive() {
+  if (ws) {
+    try { ws.close(); } catch {}
+    ws = null;
+  }
+  cleanup();
+}
+
+function cleanup() {
+  stopMic();
+  ws = null;
+  $mic.className = 'mic-btn';
+  $micLbl.textContent = 'タップしてお話する';
+  setStatus('おやすみ中');
+  modelSpeaking = false;
+  curUserText   = '';
+  shownText     = '';
+  emotionDone   = false;
+  barkCount     = 0;
+  barkSchedTime = 0;
+}
+
+// ─── Audio Input: Mic ─────────────────────────────────
+function startMic() {
+  if (!micStream) return;
+
+  // Use default rate, then resample to 16kHz
+  micCtx = new (window.AudioContext || window.webkitAudioContext)();
+  micSrcRate = micCtx.sampleRate;
+
+  const source = micCtx.createMediaStreamSource(micStream);
+  micNode = micCtx.createScriptProcessor(4096, 1, 1);
+  source.connect(micNode);
+  micNode.connect(micCtx.destination); // required for processing
+
+  micNode.onaudioprocess = (e) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    let f32 = e.inputBuffer.getChannelData(0);
+    if (micSrcRate !== IN_RATE) f32 = resample(f32, micSrcRate, IN_RATE);
+    const i16 = float32ToInt16(f32);
+    const b64 = bufToBase64(i16.buffer);
+    try {
+      ws.send(JSON.stringify({
+        realtimeInput: {
+          audio: {
+            mimeType: `audio/pcm;rate=${IN_RATE}`,
+            data: b64,
+          },
+        },
+      }));
+    } catch (err) { console.error('send mic err:', err); }
+  };
+}
+
+function stopMic() {
+  if (micNode) {
+    micNode.onaudioprocess = null;
+    try { micNode.disconnect(); } catch {}
+    micNode = null;
+  }
+  if (micCtx) {
+    try { micCtx.close(); } catch {}
+    micCtx = null;
+  }
+  if (micStream) {
+    micStream.getTracks().forEach(t => t.stop());
+    micStream = null;
+  }
+}
+
+// ─── Pet sounds (synthesized bark / squeak) ───────────
+function ensureAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// Deep bark for bulldog (personal mode) — lower pitch, longer, throaty
+function playBulldogBark(start, intensity, type) {
+  let f1, f2, dur, peakGain;
+  switch (type) {
+    case 'excited':
+      f1 = 280 + Math.random() * 40;
+      f2 = 520 + Math.random() * 60;
+      dur = 0.14 + intensity * 0.06;
+      peakGain = 0.42 + intensity * 0.10;
+      break;
+    case 'curious':
+      f1 = 240;
+      f2 = 420;
+      dur = 0.22;
+      peakGain = 0.35;
+      break;
+    case 'sad':
+      f1 = 200;
+      f2 = 140;
+      dur = 0.35;
+      peakGain = 0.28;
+      break;
+    default:
+      f1 = 250 + Math.random() * 30;
+      f2 = 400 + Math.random() * 40;
+      dur = 0.18;
+      peakGain = 0.38;
+  }
+
+  // Thick sawtooth with low bandpass — rumbling bark
+  const osc = audioCtx.createOscillator();
+  const g   = audioCtx.createGain();
+  const flt = audioCtx.createBiquadFilter();
+  flt.type = 'bandpass';
+  flt.frequency.value = 500 + intensity * 200;
+  flt.Q.value = 1.5;
+  osc.connect(flt); flt.connect(g); g.connect(audioCtx.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(f1, start);
+  if (type === 'curious') {
+    osc.frequency.exponentialRampToValueAtTime(f2, start + dur);
+  } else if (type === 'sad') {
+    osc.frequency.exponentialRampToValueAtTime(f2, start + dur);
+  } else {
+    osc.frequency.exponentialRampToValueAtTime(f2, start + dur * 0.3);
+    osc.frequency.exponentialRampToValueAtTime(f1 * 0.5, start + dur);
+  }
+  g.gain.setValueAtTime(peakGain * 0.7, start);
+  g.gain.linearRampToValueAtTime(peakGain, start + dur * 0.1);
+  g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  osc.start(start); osc.stop(start + dur + 0.01);
+
+  // Heavy breathy noise — bulldog snort
+  const noiseBuf = audioCtx.createBuffer(1, Math.max(1, Math.floor(audioCtx.sampleRate * dur)), audioCtx.sampleRate);
+  const nd = noiseBuf.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * 0.25;
+  const ns = audioCtx.createBufferSource(); ns.buffer = noiseBuf;
+  const ng = audioCtx.createGain();
+  ng.gain.setValueAtTime(0.18 * intensity, start);
+  ng.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  const nf = audioCtx.createBiquadFilter();
+  nf.type = 'lowpass'; nf.frequency.value = 900; nf.Q.value = 1;
+  ns.connect(nf); nf.connect(ng); ng.connect(audioCtx.destination);
+  ns.start(start); ns.stop(start + dur + 0.01);
+
+  // Sub-bass rumble layer
+  const sub = audioCtx.createOscillator();
+  const sg  = audioCtx.createGain();
+  sub.connect(sg); sg.connect(audioCtx.destination);
+  sub.type = 'sine';
+  sub.frequency.setValueAtTime(f1 * 0.5, start);
+  sub.frequency.exponentialRampToValueAtTime(f1 * 0.35, start + dur);
+  sg.gain.setValueAtTime(peakGain * 0.3, start);
+  sg.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  sub.start(start); sub.stop(start + dur + 0.01);
+}
+
+// One bark event for a dog. type ∈ normal|excited|curious|sad
+function playOneDogBark(start, intensity, type) {
+  let f1, f2, dur, peakGain;
+  switch (type) {
+    case 'excited':
+      f1 = 580 + Math.random() * 80;
+      f2 = 1100 + Math.random() * 100;
+      dur = 0.08 + intensity * 0.04;
+      peakGain = 0.38 + intensity * 0.12;
+      break;
+    case 'curious':
+      f1 = 480;
+      f2 = 950;                      // rising "?"
+      dur = 0.16;
+      peakGain = 0.32 + intensity * 0.05;
+      break;
+    case 'sad':
+      f1 = 380;
+      f2 = 280;                      // descending whimper
+      dur = 0.22;
+      peakGain = 0.22 + intensity * 0.05;
+      break;
+    default: // normal
+      f1 = 470 + Math.random() * 40;
+      f2 = 780 + Math.random() * 60;
+      dur = 0.12;
+      peakGain = 0.32;
+  }
+
+  // Sawtooth core with bandpass colouring
+  const osc = audioCtx.createOscillator();
+  const g   = audioCtx.createGain();
+  const flt = audioCtx.createBiquadFilter();
+  flt.type = 'bandpass';
+  flt.frequency.value = 1100 + intensity * 400;
+  flt.Q.value = 2;
+  osc.connect(flt); flt.connect(g); g.connect(audioCtx.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(f1, start);
+  if (type === 'curious') {
+    osc.frequency.exponentialRampToValueAtTime(f2, start + dur);  // pure rise
+  } else if (type === 'sad') {
+    osc.frequency.exponentialRampToValueAtTime(f2, start + dur);  // pure fall
+  } else {
+    osc.frequency.exponentialRampToValueAtTime(f2, start + dur * 0.35);
+    osc.frequency.exponentialRampToValueAtTime(f1 * 0.6, start + dur);
+  }
+  g.gain.setValueAtTime(peakGain * 0.8, start);
+  g.gain.linearRampToValueAtTime(peakGain, start + dur * 0.1);
+  g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  osc.start(start); osc.stop(start + dur + 0.01);
+
+  // Breathy noise layer scaled by intensity
+  const noiseBuf = audioCtx.createBuffer(1, Math.max(1, Math.floor(audioCtx.sampleRate * dur)), audioCtx.sampleRate);
+  const nd = noiseBuf.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * 0.15;
+  const ns = audioCtx.createBufferSource(); ns.buffer = noiseBuf;
+  const ng = audioCtx.createGain();
+  ng.gain.setValueAtTime(0.10 * intensity, start);
+  ng.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  const nf = audioCtx.createBiquadFilter();
+  nf.type = 'bandpass'; nf.frequency.value = 1800; nf.Q.value = 3;
+  ns.connect(nf); nf.connect(ng); ng.connect(audioCtx.destination);
+  ns.start(start); ns.stop(start + dur + 0.01);
+}
+
+// One squeak event for the rabbit
+function playOneUsagiSqueak(start, intensity, type) {
+  let f1, f2, dur, peakGain;
+  switch (type) {
+    case 'excited':
+      f1 = 1500 + Math.random() * 200;
+      f2 = 2200 + Math.random() * 200;
+      dur = 0.07 + intensity * 0.03;
+      peakGain = 0.28 + intensity * 0.07;
+      break;
+    case 'curious':
+      f1 = 1200;
+      f2 = 1900;                     // rising
+      dur = 0.14;
+      peakGain = 0.22;
+      break;
+    case 'sad':
+      f1 = 900;
+      f2 = 600;                      // descending
+      dur = 0.32;                    // long whimper
+      peakGain = 0.20;
+      break;
+    default:
+      f1 = 1200 + Math.random() * 100;
+      f2 = 1600 + Math.random() * 100;
+      dur = 0.12;
+      peakGain = 0.22;
+  }
+
+  const osc = audioCtx.createOscillator();
+  const g   = audioCtx.createGain();
+  osc.connect(g); g.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(f1, start);
+  if (type === 'curious' || type === 'sad') {
+    osc.frequency.exponentialRampToValueAtTime(f2, start + dur);
+  } else {
+    osc.frequency.exponentialRampToValueAtTime(f2, start + dur * 0.5);
+    osc.frequency.exponentialRampToValueAtTime(f1 * 0.9, start + dur);
+  }
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(peakGain, start + dur * 0.08);
+  g.gain.setValueAtTime(peakGain, start + dur * 0.3);
+  g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  osc.start(start); osc.stop(start + dur + 0.01);
+}
+
+// ─── Text input ────────────────────────────────────────
+async function sendText() {
+  const text = $input.value.trim();
+  if (!text) return;
+  if (!apiKey) { $setup.style.display = 'flex'; return; }
+  $input.value = '';
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    // Already connected — send immediately
+    addMsg('user', text);
+    ws.send(JSON.stringify({
+      clientContent: {
+        turns: [{ role: 'user', parts: [{ text }] }],
+        turnComplete: true,
+      },
+    }));
+  } else if (ws && ws.readyState === WebSocket.CONNECTING) {
+    // Connecting — queue
+    pendingText = text;
+  } else {
+    // Not connected — auto-connect text-only session
+    pendingText = text;
+    await connectLive(false);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

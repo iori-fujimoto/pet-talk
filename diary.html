@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ぱーそなる - 成長日記</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Zen+Old+Mincho:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-1:        #f2e7db;
+      --bg-2:        #e4d0bd;
+      --paper:       #fffaf3;
+      --paper-2:     #f6ecde;
+      --ink:         #3d342e;
+      --ink-soft:    #857569;
+      --muted:       #b9a99b;
+      --line:        #ece1d2;
+      --accent:      #b8755f;
+      --accent-deep: #8a5646;
+      --accent-soft: #e3b8a5;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Hiragino Maru Gothic Pro',
+                   'Yu Gothic', 'YuGothic', 'Segoe UI', system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #fff1e0 0%, transparent 60%),
+        radial-gradient(900px 500px at 100% 110%, #e6ccb5 0%, transparent 55%),
+        linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      -webkit-font-smoothing: antialiased;
+      font-feature-settings: 'palt';
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--paper);
+      border-radius: 32px;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.8) inset,
+        0 24px 60px rgba(96, 62, 40, .18),
+        0 6px 14px rgba(96, 62, 40, .08);
+      border: 1px solid rgba(255,255,255,.55);
+      display: flex;
+      flex-direction: column;
+      height: 96vh;
+      max-height: 880px;
+      overflow: hidden;
+    }
+
+    /* ─── Header ─── */
+    .diary-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 22px 14px;
+      flex-shrink: 0;
+    }
+    .diary-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--paper-2);
+      border: 1.5px solid rgba(255,255,255,.8);
+      box-shadow: 0 4px 10px rgba(96,62,40,.12);
+    }
+    .diary-title {
+      font-family: 'Zen Old Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: .04em;
+    }
+    .diary-sub {
+      font-size: 11px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+      letter-spacing: .04em;
+    }
+
+    /* ─── Stats row ─── */
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      padding: 0 18px 14px;
+      flex-shrink: 0;
+    }
+    .stat-card {
+      flex: 1;
+      background: var(--paper-2);
+      border-radius: 16px;
+      padding: 11px 8px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: 0 2px 6px rgba(96,62,40,.05);
+    }
+    .stat-value {
+      font-family: 'Zen Old Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.2;
+      letter-spacing: .02em;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--ink-soft);
+      margin-top: 3px;
+      letter-spacing: .06em;
+    }
+
+    /* ─── Diary list ─── */
+    .diary-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 18px 14px;
+      border-top: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(246,236,222,.35) 0%, transparent 80px);
+    }
+    .diary-list::-webkit-scrollbar { width: 4px; }
+    .diary-list::-webkit-scrollbar-thumb { background: #e2d5c4; border-radius: 2px; }
+
+    .diary-entry {
+      background: var(--paper-2);
+      border-radius: 18px;
+      padding: 15px 17px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255,255,255,.6);
+      box-shadow: 0 2px 6px rgba(96,62,40,.05);
+    }
+    .diary-date {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: .06em;
+    }
+    .diary-body {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .diary-mood {
+      font-size: 12px;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: .03em;
+    }
+
+    /* ─── Section divider ─── */
+    .diary-section {
+      font-family: 'Zen Old Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      padding: 12px 0 6px;
+      letter-spacing: .12em;
+      position: relative;
+    }
+    .diary-section::before,
+    .diary-section::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 28px;
+      height: 1px;
+      background: var(--line);
+    }
+    .diary-section::before { left: 50%; margin-left: -84px; }
+    .diary-section::after  { left: 50%; margin-left: 56px; }
+
+    /* ─── Bottom tab bar ─── */
+    .bottom-tabs {
+      display: flex;
+      border-top: 1px solid var(--line);
+      flex-shrink: 0;
+      background: var(--paper);
+      padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+    }
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 5px 0;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 10px;
+      transition: color .25s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab-item.active { color: var(--accent); }
+    .tab-icon  { display: block; width: 22px; height: 22px; }
+    .tab-label { font-weight: 500; letter-spacing: .08em; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="diary-header">
+    <img id="avatar" class="diary-avatar" src="" alt="">
+    <div>
+      <div id="diaryTitle" class="diary-title"></div>
+      <div id="diarySub" class="diary-sub"></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">3</div>
+      <div class="stat-label">いっしょの日数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">12</div>
+      <div class="stat-label">おしゃべり回数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">85<span style="font-size:13px">%</span></div>
+      <div class="stat-label">ごきげん度</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">Lv.4</div>
+      <div class="stat-label">なかよし度</div>
+    </div>
+  </div>
+
+  <!-- Diary entries -->
+  <div id="diaryList" class="diary-list"></div>
+
+  <!-- Bottom tabs -->
+  <nav class="bottom-tabs">
+    <a href="index.html" class="tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5c0-3.6 3.58-6.5 8-6.5s8 2.9 8 6.5-3.58 6.5-8 6.5c-.85 0-1.67-.11-2.43-.31L5.5 19.5l1.2-3.02C5.13 15.14 4 13.42 4 11.5z"/></svg>
+      <span class="tab-label">トーク</span>
+    </a>
+    <a href="diary.html" class="tab-item active">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-1.8-1.3-4.5-2-7.5-2v13c3 0 5.7.7 7.5 2 1.8-1.3 4.5-2 7.5-2v-13c-3 0-5.7.7-7.5 2z"/><path d="M12 6.5v13"/></svg>
+      <span class="tab-label">日記</span>
+    </a>
+    <a href="gacha-mock.html" class="tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4c0 3.5 2.5 6 6 6-3.5 0-6 2.5-6 6 0-3.5-2.5-6-6-6 3.5 0 6-2.5 6-6z"/></svg>
+      <span class="tab-label">であい</span>
+    </a>
+  </nav>
+</div>
+
+<script>
+// ─── Image mapping ───────────────────────────────────
+const IMAGES = {
+  dog:   'public/images/generated_1_happy.png',
+  usagi: 'public/images/usagi_happy.png',
+};
+
+// ─── Demo diary entries ──────────────────────────────
+const DIARY = {
+  dog: [
+    { date: '2026年4月16日', body: 'きょうはいっぱい話しかけてくれたぜ。\nブフッ…わるくねーな。', mood: '😊 ごきげん' },
+    { date: '2026年4月16日', body: '昼メシのあと眠くなっちまった。\n目の前でずっと見てたろ？…べつにうれしくねーし。', mood: '😴 ねむい' },
+    { date: '2026年4月15日', body: 'さんぽで大きい犬に会ったけど…\nビビってねーからな。ぜんぜん。フガッ。', mood: '😤 つよがり' },
+    { date: '2026年4月15日', body: 'あたまなでてくれたな。\nまぁ…もうちょいやってくれてもいーぜ。', mood: '🥰 あまえんぼ' },
+    { date: '2026年4月14日', body: 'はじめて会った日だ。\nよろしくな。…めんどう見てやるぜ。', mood: '🤝 はじめまして' },
+  ],
+  usagi: [
+    { date: '2026年4月16日', body: 'きょうはいっぱいおしゃべりしたぴょん。\nうれしくてみみがぴんってなっちゃった。', mood: '😊 ごきげん' },
+    { date: '2026年4月16日', body: 'おひるねしてたらそっと毛布かけてくれたうさ…\nえへへ、あったかかった。', mood: '😴 すやすや' },
+    { date: '2026年4月15日', body: 'にんじんおいしかったぴょん。\nもうちょっとほしかったな…ちらっ。', mood: '😋 くいしんぼ' },
+    { date: '2026年4月15日', body: 'おるすばんさびしかったうさ…。\nでもかえってきてくれてうれしい。ぎゅってして。', mood: '🥺 さびしがり' },
+    { date: '2026年4月14日', body: 'はじめまして…だぴょん。\nちょっとどきどきするけど…よろしくね。', mood: '💕 はじめまして' },
+  ],
+};
+
+// ─── Render ──────────────────────────────────────────
+function init() {
+  let variant;
+  try { variant = JSON.parse(localStorage.getItem('personal-variant')); } catch {}
+
+  if (!variant) {
+    window.location.href = 'gacha-mock.html';
+    return;
+  }
+
+  const charType = variant.charType || 'dog';
+  const name = variant.name || 'ペット';
+
+  // Header
+  document.getElementById('avatar').src = IMAGES[charType] || IMAGES.dog;
+  document.getElementById('diaryTitle').textContent = name + 'の成長日記';
+  document.getElementById('diarySub').textContent = variant.personality + ' / いっしょに3日め';
+
+  // Diary entries
+  const entries = DIARY[charType] || DIARY.dog;
+  const $list = document.getElementById('diaryList');
+  let lastDate = '';
+
+  entries.forEach(e => {
+    // Date section header
+    if (e.date !== lastDate) {
+      const sec = document.createElement('div');
+      sec.className = 'diary-section';
+      sec.textContent = e.date;
+      $list.appendChild(sec);
+      lastDate = e.date;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'diary-entry';
+    card.innerHTML =
+      `<div class="diary-body">${e.body.replace(/\n/g, '<br>')}</div>` +
+      `<div class="diary-mood">${e.mood}</div>`;
+    $list.appendChild(card);
+  });
+}
+
+init();
+</script>
+</body>
+</html>

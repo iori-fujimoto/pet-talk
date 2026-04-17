@@ -1,0 +1,22 @@
+# Local dev server (not used on GitHub Pages)
+server.js
+cert.pem
+key.pem
+open-firewall.bat
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Scripts / notes
+scripts/
+
+# Claude memory
+memory/
+.claude/
